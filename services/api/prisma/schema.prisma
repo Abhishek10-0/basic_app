@@ -1,0 +1,374 @@
+generator client {
+ provider = "prisma-client-js"
+}
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL")
+}
+enum AdminRole {
+ SUPER_ADMIN
+ ADMIN
+ EDITOR
+}
+enum MembershipStatus {
+ PENDING
+ ACTIVE
+ EXPIRED
+ CANCELLED
+ FAILED
+}
+enum PaymentStatus {
+ CREATED
+ PENDING
+ PAID
+ FAILED
+ REFUNDED
+}
+enum PaymentType {
+ MEMBERSHIP
+ EVENT
+}
+enum BookingStatus {
+ PAYMENT_PENDING
+ CONFIRMED
+ CANCELLED
+ FAILED
+ ATTENDED
+}
+enum PublishStatus {
+ DRAFT
+ PUBLISHED
+ ARCHIVED
+}
+enum EnquiryStatus {
+ NEW
+ CONTACTED
+ CLOSED
+}
+model User {
+ id String @id @default(cuid())
+ firstName String
+ lastName String
+ email String @unique
+ mobile String @unique
+ passwordHash String
+ companyName String?
+ designation String?
+ address String?
+ photo String?
+ emailVerified Boolean @default(false)
+ mobileVerified Boolean @default(false)
+ businessActivities String @default("")
+ city String @default("")
+ disabled Boolean @default(false)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ memberships UserMembership[]
+ bookings EventBooking[]
+ payments Payment[]
+ notifications Notification[]
+ refreshTokens RefreshToken[]
+ verificationTokens VerificationToken[]
+ pushTokens PushToken[]
+}
+model Admin {
+ id String @id @default(cuid())
+ name String
+ email String @unique
+ mobile String? @unique
+ passwordHash String
+ role AdminRole @default(ADMIN)
+ disabled Boolean @default(false)
+ createdAt DateTime @default(now())
+ logs AdminActivityLog[]
+ refreshTokens RefreshToken[]
+}
+model RefreshToken {
+ id String @id @default(cuid())
+ tokenHash String @unique
+ family String
+ userId String?
+ adminId String?
+ user User? @relation(fields:[userId],references:[id],onDelete:Cascade)
+ admin Admin? @relation(fields:[adminId],references:[id],onDelete:Cascade)
+ expiresAt DateTime
+ revokedAt DateTime?
+ createdAt DateTime @default(now())
+ @@index([family])
+}
+model SignupOtp {
+ mobile String @id
+ tokenHash String
+ purpose String @default("signup")
+ attempts Int @default(0)
+ expiresAt DateTime
+ sentAt DateTime @default(now())
+}
+
+model VerificationToken {
+ id String @id @default(cuid())
+ tokenHash String @unique
+ purpose String
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ expiresAt DateTime
+ createdAt DateTime @default(now())
+}
+model MembershipPlan {
+ id String @id @default(cuid())
+ title String
+ slug String @unique
+ shortDescription String
+ fullDescription String @default("")
+ durationMonths Int
+ originalPrice Int?
+ price Int
+ gstPercentage Float @default(18)
+ benefits String[]
+ eligibility String @default("")
+ termsAndConditions String @default("")
+ active Boolean @default(true)
+ featured Boolean @default(false)
+ sortOrder Int @default(0)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ memberships UserMembership[]
+}
+model UserMembership {
+ id String @id @default(cuid())
+ userId String
+ planId String
+ user User @relation(fields:[userId],references:[id])
+ plan MembershipPlan @relation(fields:[planId],references:[id])
+ planTitle String
+ durationMonths Int
+ status MembershipStatus @default(PENDING)
+ startDate DateTime?
+ endDate DateTime?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ payment Payment?
+ @@index([userId,status])
+}
+model Event {
+ id String @id @default(cuid())
+ title String
+ slug String @unique
+ shortDescription String
+ description String @default("")
+ bannerImage String @default("")
+ eventUrl String @default("")
+ venue String
+ address String @default("")
+ city String
+ state String @default("")
+ country String @default("India")
+ googleMapsUrl String @default("")
+ startDate DateTime
+ endDate DateTime
+ startTime String @default("09:00")
+ endTime String @default("17:00")
+ eventType String @default("Conference")
+ paid Boolean @default(false)
+ price Int @default(0)
+ gstPercentage Float @default(18)
+ availableSeats Int
+ reservedSeats Int @default(0)
+ registrationDeadline DateTime
+ organizerName String @default("SME Chamber of India")
+ organizerEmail String @default("")
+ organizerPhone String @default("")
+ contactPerson String @default("")
+ agenda String @default("")
+ terms String @default("")
+ status PublishStatus @default(DRAFT)
+ featured Boolean @default(false)
+ published Boolean @default(false)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ speakers EventSpeaker[]
+ gallery EventGallery[]
+ bookings EventBooking[]
+ @@index([published,startDate])
+}
+model EventSpeaker {
+ id String @id @default(cuid())
+ eventId String
+ event Event @relation(fields:[eventId],references:[id],onDelete:Cascade)
+ name String
+ designation String @default("")
+ photo String @default("")
+}
+model EventGallery {
+ id String @id @default(cuid())
+ eventId String
+ event Event @relation(fields:[eventId],references:[id],onDelete:Cascade)
+ url String
+}
+model EventBooking {
+ id String @id @default(cuid())
+ reference String @unique
+ eventId String
+ userId String?
+ event Event @relation(fields:[eventId],references:[id])
+ user User? @relation(fields:[userId],references:[id])
+ fullName String
+ email String
+ mobile String
+ companyName String
+ designation String @default("")
+ address String @default("")
+ attendees Int
+ gstNumber String @default("")
+ note String @default("")
+ status BookingStatus @default(PAYMENT_PENDING)
+ expiresAt DateTime?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ payment Payment?
+ @@index([eventId,status])
+ @@index([userId])
+}
+model Payment {
+ id String @id @default(cuid())
+ type PaymentType
+ userId String?
+ user User? @relation(fields:[userId],references:[id])
+ eventBookingId String? @unique
+ booking EventBooking? @relation(fields:[eventBookingId],references:[id])
+ membershipId String? @unique
+ membership UserMembership? @relation(fields:[membershipId],references:[id])
+ razorpayOrderId String? @unique
+ razorpayPaymentId String? @unique
+ razorpaySignature String?
+ amount Int
+ gstAmount Int
+ totalAmount Int
+ currency String @default("INR")
+ status PaymentStatus @default(CREATED)
+ gatewayResponse Json?
+ invoiceNumber String? @unique
+ billingName String
+ billingEmail String
+ billingMobile String
+ billingCompany String @default("")
+ gstNumber String @default("")
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@index([status,type,createdAt])
+}
+model News {
+ id String @id @default(cuid())
+ title String
+ slug String @unique
+ excerpt String
+ content String
+ featuredImage String @default("")
+ category String @default("News")
+ publishedAt DateTime @default(now())
+ status PublishStatus @default(DRAFT)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+}
+model Enquiry {
+ id String @id @default(cuid())
+ name String
+ email String
+ mobile String
+ company String @default("")
+ businessActivities String @default("")
+ industrialSectors String @default("")
+ specificInterest String @default("")
+ yearOfRegistration String @default("")
+ interests String[] @default([])
+ designation String @default("")
+ city String
+ state String @default("")
+ subject String
+ message String
+ status EnquiryStatus @default(NEW)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+}
+model Notification {
+ id String @id @default(cuid())
+ userId String?
+ user User? @relation(fields:[userId],references:[id],onDelete:Cascade)
+ title String
+ message String
+ deepLink String @default("")
+ imageUrl String @default("")
+ campaignId String?
+ readAt DateTime?
+ createdAt DateTime @default(now())
+}
+model PushCampaign {
+ id String @id @default(cuid())
+ title String
+ message String
+ deepLink String @default("")
+ imageUrl String @default("")
+ audience String @default("ALL")
+ status String @default("QUEUED")
+ attempts Int @default(0)
+ lastError String?
+ scheduledFor DateTime?
+ sentAt DateTime?
+ createdAt DateTime @default(now())
+ deliveries PushDelivery[]
+}
+model PushDelivery {
+ id String @id @default(cuid())
+ campaignId String
+ token String
+ ticketId String?
+ status String @default("QUEUED")
+ error String?
+ sentAt DateTime?
+ checkedAt DateTime?
+ campaign PushCampaign @relation(fields:[campaignId],references:[id],onDelete:Cascade)
+ @@unique([campaignId, token])
+ @@index([status, sentAt])
+ @@index([ticketId])
+}
+model PushToken {
+ id String @id @default(cuid())
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ token String @unique
+ createdAt DateTime @default(now())
+}
+model AdminActivityLog {
+ id String @id @default(cuid())
+ adminId String
+ admin Admin @relation(fields:[adminId],references:[id])
+ action String
+ resource String
+ resourceId String
+ createdAt DateTime @default(now())
+}
+model Media {
+ id String @id @default(cuid())
+ url String
+ filename String
+ mimeType String
+ size Int
+ createdAt DateTime @default(now())
+}
+model AppSetting {
+ key String @id
+ value Json
+ updatedAt DateTime @updatedAt
+}
+model EmailJob {
+ id String @id @default(cuid())
+ dedupeKey String @unique
+ to String
+ subject String
+ html String
+ attempts Int @default(0)
+ sentAt DateTime?
+ nextAttempt DateTime @default(now())
+ lastError String?
+ createdAt DateTime @default(now())
+}

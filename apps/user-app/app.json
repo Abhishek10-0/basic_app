@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "SMECHM",
+    "slug": "smechm",
+    "scheme": "smechamber",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/logo.png",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.smechamberofindia.app"
+    },
+    "android": {
+      "package": "com.smechamberofindia.app",
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#dff4ff"
+      }
+    },
+    "androidStatusBar": {
+      "barStyle": "dark-content",
+      "backgroundColor": "#f7f8fa",
+      "translucent": false
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/logo.png",
+          "imageWidth": 132,
+          "backgroundColor": "#dff4ff"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#087ea4",
+          "defaultChannel": "default"
+        }
+      ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "82bd83be-61d1-4203-9de2-abf8936a9ed7"
+      }
+    }
+  }
+}

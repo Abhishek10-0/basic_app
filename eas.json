@@ -1,0 +1,28 @@
+{
+  "cli": {
+    "version": ">= 24.7.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://sme-api-oezd.onrender.com/api/v1"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "NODE_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://sme-api-oezd.onrender.com/api/v1"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

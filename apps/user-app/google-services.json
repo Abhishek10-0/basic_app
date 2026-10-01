@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "803935915046",
+    "project_id": "smechm-febee",
+    "storage_bucket": "smechm-febee.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:803935915046:android:129702658d0aa97936eae7",
+        "android_client_info": {
+          "package_name": "com.smechamberofindia.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCd0jRyDSVdGZHXcM8526mEvTIGLTzUsfk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

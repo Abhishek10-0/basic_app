@@ -1,0 +1,101 @@
+export type ApiResponse<T> =
+  | { success: true; message: string; data: T }
+  | { success: false; message: string; errors?: unknown[] };
+export type Page<T> = {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+export type User = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  mobile: string;
+  companyName: string | null;
+  designation: string | null;
+  address: string | null;
+  photo: string | null;
+  emailVerified: boolean;
+  mobileVerified: boolean;
+  businessActivities: string;
+  city: string;
+};
+export type Session = {
+  accessToken: string;
+  refreshToken?: string;
+  user?: User;
+  admin?: { id: string; name: string; role: string };
+};
+export type Plan = {
+  id: string;
+  slug: string;
+  title: string;
+  shortDescription: string;
+  fullDescription: string;
+  durationMonths: number;
+  price: number;
+  originalPrice: number | null;
+  gstPercentage: number;
+  benefits: string[];
+  eligibility: string;
+  termsAndConditions: string;
+  featured: boolean;
+  active: boolean;
+};
+export type ChamberEvent = {
+  id: string;
+  slug: string;
+  title: string;
+  shortDescription: string;
+  description: string;
+  bannerImage: string;
+  eventUrl: string;
+  venue: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  googleMapsUrl: string;
+  startDate: string;
+  endDate: string;
+  startTime: string;
+  endTime: string;
+  eventType: string;
+  paid: boolean;
+  price: number;
+  gstPercentage: number;
+  availableSeats: number;
+  registrationDeadline: string;
+  organizerName: string;
+  organizerEmail: string;
+  organizerPhone: string;
+  contactPerson: string;
+  agenda: string;
+  terms: string;
+  speakers: { name: string; designation: string; photo: string }[];
+  gallery: { url: string }[];
+};
+export type News = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  featuredImage: string;
+  category: string;
+  publishedAt: string;
+};
+export type PaymentOrder = {
+  orderId: string;
+  paymentId: string;
+  keyId: string;
+  amount: number;
+  currency: string;
+  checkoutUrl: string;
+  statusUrl: string;
+  status?: string;
+  reference?: string;
+};
+export type RecordRow = { id: string; [key: string]: unknown };
